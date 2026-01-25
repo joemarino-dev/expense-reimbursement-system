@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Expense - Expense Reimbursement System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        
+        input.error, select.error, textarea.error {
+            border-color: #dc3545;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .required {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Submit Expense</h1>
+        <p class="subtitle">Request reimbursement for business expenses</p>
+        
+        <div id="message" class="message"></div>
+        
+        <form id="expenseForm" novalidate>
+            <div class="form-group">
+                <label for="submitter_email">Your Email <span class="required">*</span></label>
+                <input type="email" id="submitter_email" name="submitter_email">
+                <div class="error-message" id="submitter_email_error"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="amount">Amount ($) <span class="required">*</span></label>
+                <input type="number" id="amount" name="amount" step="0.01">
+                <div class="error-message" id="amount_error"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="expense_date">Date <span class="required">*</span></label>
+                <input type="date" id="expense_date" name="expense_date">
+                <div class="error-message" id="expense_date_error"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Category <span class="required">*</span></label>
+                <select id="category" name="category">
+                    <option value="">-- Select Category --</option>
+                    <option value="Travel">Travel</option>
+                    <option value="Meals">Meals</option>
+                    <option value="Supplies">Supplies</option>
+                    <option value="Equipment">Equipment</option>
+                    <option value="Other">Other</option>
+                </select>
+                <div class="error-message" id="category_error"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description <span class="required">*</span></label>
+                <textarea id="description" name="description" placeholder="Brief description of the expense..."></textarea>
+                <div class="error-message" id="description_error"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="approver_email">Approver Email <span class="required">*</span></label>
+                <input type="email" id="approver_email" name="approver_email">
+                <div class="error-message" id="approver_email_error"></div>
+            </div>
+            
+            <button type="submit" class="btn" id="submitBtn">Submit Expense</button>
+        </form>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000/api/expenses';
+        
+        // Validation functions
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        function validateAmount(amount) {
+            const num = parseFloat(amount);
+            return !isNaN(num) && num > 0;
+        }
+        
+        function validateDescription(description) {
+            return description.trim().length >= 1 && description.trim().length <= 500;
+        }
+        
+        function showError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorDiv = document.getElementById(fieldId + '_error');
+            
+            field.classList.add('error');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+        
+        function clearError(fieldId) {
+            const field = document.getElementById(fieldId);
+            const errorDiv = document.getElementById(fieldId + '_error');
+            
+            field.classList.remove('error');
+            errorDiv.textContent = '';
+            errorDiv.classList.remove('show');
+        }
+        
+        function clearAllErrors() {
+            const fields = ['submitter_email', 'amount', 'expense_date', 'category', 'description', 'approver_email'];
+            fields.forEach(field => clearError(field));
+        }
+        
+        function validateForm() {
+            clearAllErrors();
+            let isValid = true;
+            
+            // Validate submitter email
+            const submitterEmail = document.getElementById('submitter_email').value;
+            if (!submitterEmail) {
+                showError('submitter_email', 'Your email is required');
+                isValid = false;
+            } else if (!validateEmail(submitterEmail)) {
+                showError('submitter_email', 'Please enter a valid email address');
+                isValid = false;
+            }
+            
+            // Validate amount
+            const amount = document.getElementById('amount').value;
+            if (!amount) {
+                showError('amount', 'Amount is required');
+                isValid = false;
+            } else if (!validateAmount(amount)) {
+                showError('amount', 'Amount must be greater than 0');
+                isValid = false;
+            }
+            
+            // Validate date
+            const expenseDate = document.getElementById('expense_date').value;
+            if (!expenseDate) {
+                showError('expense_date', 'Date is required');
+                isValid = false;
+            }
+            
+            // Validate category
+            const category = document.getElementById('category').value;
+            if (!category) {
+                showError('category', 'Please select a category');
+                isValid = false;
+            }
+            
+            // Validate description
+            const description = document.getElementById('description').value;
+            if (!description.trim()) {
+                showError('description', 'Description is required');
+                isValid = false;
+            } else if (!validateDescription(description)) {
+                showError('description', 'Description must be between 1 and 500 characters');
+                isValid = false;
+            }
+            
+            // Validate approver email
+            const approverEmail = document.getElementById('approver_email').value;
+            if (!approverEmail) {
+                showError('approver_email', 'Approver email is required');
+                isValid = false;
+            } else if (!validateEmail(approverEmail)) {
+                showError('approver_email', 'Please enter a valid email address');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        // Form submission
+        document.getElementById('expenseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Validate form
+            if (!validateForm()) {
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const messageDiv = document.getElementById('message');
+            
+            // Disable button during submission
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            // Get form data
+            const formData = {
+                submitter_email: document.getElementById('submitter_email').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                expense_date: document.getElementById('expense_date').value,
+                category: document.getElementById('category').value,
+                description: document.getElementById('description').value,
+                approver_email: document.getElementById('approver_email').value
+            };
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Success
+                    messageDiv.className = 'message success';
+                    messageDiv.style.display = 'block';
+                    messageDiv.textContent = `Success! Expense #${data.id} submitted for $${data.amount}. Status: ${data.status}`;
+                    
+                    // Reset form
+                    document.getElementById('expenseForm').reset();
+                    clearAllErrors();
+                    
+                    // Set today's date again after reset
+                    document.getElementById('expense_date').valueAsDate = new Date();
+                } else {
+                    // Error from API
+                    messageDiv.className = 'message error';
+                    messageDiv.style.display = 'block';
+                    messageDiv.textContent = `Error: ${data.detail || 'Failed to submit expense'}`;
+                }
+            } catch (error) {
+                // Network error
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
+                messageDiv.textContent = `Network error: ${error.message}. Make sure the API server is running.`;
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Expense';
+            }
+        });
+        
+        // Set today's date as default
+        document.getElementById('expense_date').valueAsDate = new Date();
+    </script>
+</body>
+</html>

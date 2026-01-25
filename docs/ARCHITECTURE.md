@@ -97,6 +97,43 @@ This architecture separates concerns into distinct layers, making each layer ind
 
 **Testing benefit:** Stable, straightforward UI for Playwright automation
 
+### Frontend Deployment Strategy
+
+**Development/Demo Approach:**
+- Frontend served as static files through FastAPI using `StaticFiles` mount
+- Accessible at: `http://127.0.0.1:8000/static/`
+- Single command to run entire application (`uvicorn app.main:app --reload`)
+
+**Why this approach for the portfolio project:**
+- ✅ Simplifies local development and testing
+- ✅ Easier for code reviewers to run and evaluate
+- ✅ Playwright E2E tests work identically regardless of serving method
+- ✅ Focus remains on backend architecture and test automation
+
+**Production Deployment (documented approach):**
+
+In a production environment, frontend and backend would be deployed separately:
+```
+Frontend (Static Files)
+├── Deployment: Vercel, Netlify, AWS S3+CloudFront, Azure Static Web Apps
+├── URL: https://app.company.com
+└── Calls backend API via HTTPS
+
+Backend (FastAPI API)
+├── Deployment: AWS ECS/EKS, Azure App Service, Google Cloud Run
+├── URL: https://api.company.com
+└── Serves JSON responses only (no static files)
+```
+
+**Benefits of separate deployment:**
+- Independent scaling (frontend CDN vs backend compute)
+- Team separation (frontend/backend teams deploy independently)
+- Technology flexibility (swap frontend framework without touching API)
+- Performance optimization (static assets on edge servers globally)
+- Security (separate domains, CORS configuration)
+
+**For this project:** The focus is demonstrating comprehensive test automation capabilities across all backend layers. The simplified frontend deployment strategy enables rapid iteration while maintaining realistic testing practices.
+
 ### Containerization: Docker & Docker Compose
 
 **Why Docker:**
