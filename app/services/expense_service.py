@@ -1,67 +1,60 @@
 """
 Business logic for expense operations.
+Uses repository layer for data access.
 """
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.schemas import ExpenseCreate
-from app.models.database_models import Expense, User, Notification
+from app.models.database_models import Expense
+from app.repositories import ExpenseRepository, UserRepository, NotificationRepository
 
 
-def create_expense(expense_data: ExpenseCreate, db: Session) -> Expense:
-    """
-    Create a new expense submission.
+class ExpenseService:
+    """Business logic for expense operations."""
     
-    Business rules:
-    - Submitter must exist as a user
-    - Approver must exist as a user
-    - Status defaults to 'Submitted'
+    def __init__(self, db: Session):
+        self.expense_repo = ExpenseRepository(db)
+        self.user_repo = UserRepository(db)
+        self.notification_repo = NotificationRepository(db)
     
-    Raises:
-        HTTPException: If submitter or approver not found
-    
-    Returns:
-        Created Expense object
-    """
-    # Verify submitter exists
-    submitter = db.query(User).filter(User.email == expense_data.submitter_email).first()
-    if not submitter:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Submitter with email {expense_data.submitter_email} not found. User must be registered first."
+    def create_expense(self, expense_data: ExpenseCreate) -> Expense:
+        """
+        Create a new expense submission.
+        
+        Business rules:
+        - Submitter must exist in system
+        - Approver must exist in system
+        - Creates notification event log
+        """
+        # Validate submitter exists
+        submitter = self.user_repo.get_by_email(expense_data.submitter_email)
+        if not submitter:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Submitter email '{expense_data.submitter_email}' not found in system"
+            )
+        
+        # Validate approver exists
+        approver = self.user_repo.get_by_email(expense_data.approver_email)
+        if not approver:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Approver email '{expense_data.approver_email}' not found in system"
+            )
+        
+        # Create expense
+        expense = self.expense_repo.create(
+            expense_data=expense_data,
+            user_email=expense_data.submitter_email,
+            approver_email=expense_data.approver_email
         )
-    
-    # Verify approver exists
-    approver = db.query(User).filter(User.email == expense_data.approver_email).first()
-    if not approver:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Approver with email {expense_data.approver_email} not found. User must be registered first."
+        
+        # Log notification event
+        self.notification_repo.create(
+            expense_id=expense.id,
+            event_type="expense_submitted",
+            message=f"Expense ${expense.amount} submitted by {expense.user_email}"
         )
-    
-    # Create the expense
-    new_expense = Expense(
-        user_email=expense_data.submitter_email,
-        amount=expense_data.amount,
-        expense_date=expense_data.expense_date,
-        category=expense_data.category,
-        description=expense_data.description,
-        status="Submitted",
-        approver_email=expense_data.approver_email
-    )
-    
-    db.add(new_expense)
-    db.commit()
-    db.refresh(new_expense)
-    
-    # Create notification event
-    notification = Notification(
-        expense_id=new_expense.id,
-        event_type="expense_submitted",
-        message=f"Expense #{new_expense.id} submitted by {expense_data.submitter_email} for ${expense_data.amount}"
-    )
-    
-    db.add(notification)
-    db.commit()
-    
-    return new_expense
+        
+        return expense
