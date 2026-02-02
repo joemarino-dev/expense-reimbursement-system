@@ -2,9 +2,10 @@
 Business logic for expense operations.
 Uses repository layer for data access.
 """
+from datetime import date
+from decimal import Decimal
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-
 from app.schemas import ExpenseCreate
 from app.models.database_models import Expense
 from app.repositories import ExpenseRepository, UserRepository, NotificationRepository
@@ -19,42 +20,30 @@ class ExpenseService:
         self.notification_repo = NotificationRepository(db)
     
     def create_expense(self, expense_data: ExpenseCreate) -> Expense:
-        """
-        Create a new expense submission.
-        
-        Business rules:
-        - Submitter must exist in system
-        - Approver must exist in system
-        - Creates notification event log
-        """
-        # Validate submitter exists
+        """Create a new expense with validation."""
+        # Validate users exist
         submitter = self.user_repo.get_by_email(expense_data.submitter_email)
         if not submitter:
             raise HTTPException(
                 status_code=404,
-                detail=f"Submitter email '{expense_data.submitter_email}' not found in system"
+                detail=f"User not found: {expense_data.submitter_email}"
             )
         
-        # Validate approver exists
         approver = self.user_repo.get_by_email(expense_data.approver_email)
         if not approver:
             raise HTTPException(
                 status_code=404,
-                detail=f"Approver email '{expense_data.approver_email}' not found in system"
+                detail=f"Approver not found: {expense_data.approver_email}"
             )
         
         # Create expense
-        expense = self.expense_repo.create(
-            expense_data=expense_data,
-            user_email=expense_data.submitter_email,
-            approver_email=expense_data.approver_email
-        )
+        expense = self.expense_repo.create(expense_data)
         
-        # Log notification event
+        # Log notification
         self.notification_repo.create(
             expense_id=expense.id,
             event_type="expense_submitted",
-            message=f"Expense ${expense.amount} submitted by {expense.user_email}"
+            message=f"Expense submitted by {expense_data.submitter_email}"
         )
         
         return expense

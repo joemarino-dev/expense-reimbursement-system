@@ -14,16 +14,16 @@ class ExpenseRepository:
     def __init__(self, db: Session):
         self.db = db
     
-    def create(self, expense_data: ExpenseCreate, user_email: str, approver_email: str) -> Expense:
+    def create(self, expense_data: ExpenseCreate) -> Expense:
         """Create a new expense record."""
         expense = Expense(
-            user_email=user_email,
+            user_email=expense_data.submitter_email,
             amount=expense_data.amount,
             expense_date=expense_data.expense_date,
             category=expense_data.category,
             description=expense_data.description,
             status="Submitted",
-            approver_email=approver_email
+            approver_email=expense_data.approver_email
         )
         self.db.add(expense)
         self.db.commit()

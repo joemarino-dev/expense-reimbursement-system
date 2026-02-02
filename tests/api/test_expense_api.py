@@ -48,7 +48,7 @@ def test_create_expense_submitter_not_found(test_client, sample_approver, sample
     response = test_client.post("/api/expenses", json=sample_expense_data)
     
     assert response.status_code == 404
-    assert "submitter" in response.json()["detail"].lower()
+    assert "user not found" in response.json()["detail"].lower()
 
 
 def test_create_expense_approver_not_found(test_client, sample_user, sample_expense_data):
@@ -66,7 +66,7 @@ def test_create_expense_approver_not_found(test_client, sample_user, sample_expe
     response = test_client.post("/api/expenses", json=sample_expense_data)
     
     assert response.status_code == 404
-    assert "approver" in response.json()["detail"].lower()
+    assert "approver not found" in response.json()["detail"].lower()
     
 def test_create_expense_invalid_data(test_client):
     """

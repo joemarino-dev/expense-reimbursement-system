@@ -164,7 +164,7 @@ def test_create_expense_submitter_not_found(
     
     # Verify exception details
     assert exc_info.value.status_code == 404
-    assert "Submitter email" in exc_info.value.detail
+    assert "User not found" in exc_info.value.detail
     assert "nonexistent@company.com" in exc_info.value.detail
     
     # Verify expense was NEVER created (validation failed first)
@@ -219,7 +219,7 @@ def test_create_expense_approver_not_found(
         service.create_expense(expense_data)
     
     assert exc_info.value.status_code == 404
-    assert "Approver email" in exc_info.value.detail
+    assert "Approver not found" in exc_info.value.detail
     assert "nonexistent@company.com" in exc_info.value.detail
     
     # Verify expense never created
