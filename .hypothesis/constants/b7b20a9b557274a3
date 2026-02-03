@@ -1,0 +1,4 @@
+# file: /Users/marino/Coding/expense-reimbursement-system/app/schemas.py
+# hypothesis_version: 6.151.4
+
+[125.5, 500, '2026-01-20', 'Travel', 'amount', 'approver_email', 'category', 'description', 'example', 'expense_date', 'from_attributes', 'john.doe@company.com', 'json_schema_extra', 'submitter_email']

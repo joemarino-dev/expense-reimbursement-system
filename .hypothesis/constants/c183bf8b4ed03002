@@ -1,0 +1,4 @@
+# file: /Users/marino/Coding/expense-reimbursement-system/app/config.py
+# hypothesis_version: 6.151.4
+
+[5432, '.env', '/api', 'development', 'localhost']

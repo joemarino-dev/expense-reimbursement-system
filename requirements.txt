@@ -1,23 +1,48 @@
-# Core Framework
+alembic==1.14.0
+annotated-types==0.7.0
+anyio==4.12.1
+certifi==2026.1.4
+charset-normalizer==3.4.4
+click==8.3.1
+coverage==7.13.2
+dnspython==2.8.0
+email_validator==2.2.0
 fastapi==0.115.5
-uvicorn[standard]==0.32.1  # ASGI server for FastAPI
-
-# Database & ORM
-sqlalchemy==2.0.36
-alembic==1.14.0  # Database migrations
-psycopg2-binary==2.9.10  # PostgreSQL adapter
-
-# Data Validation
+greenlet==3.1.1
+h11==0.16.0
+httpcore==1.0.9
+httptools==0.7.1
+httpx==0.28.1
+hypothesis==6.151.4
+idna==3.11
+iniconfig==2.3.0
+Mako==1.3.10
+MarkupSafe==3.0.3
+packaging==25.0
+playwright==1.49.1
+pluggy==1.6.0
+psycopg2-binary==2.9.10
 pydantic==2.10.3
-pydantic-settings==2.6.1  # For config management with .env files
-email-validator==2.2.0  # For EmailStr validation
-
-# Testing
+pydantic-settings==2.6.1
+pydantic_core==2.27.1
+pyee==12.0.0
 pytest==8.3.4
-pytest-asyncio==0.24.0  # For async test support
-httpx==0.28.1  # For FastAPI TestClient
-playwright==1.49.1  # E2E testing (we'll use this later)
+pytest-asyncio==0.24.0
+pytest-base-url==2.1.0
+pytest-cov==7.0.0
+pytest-mock==3.15.1
 pytest-playwright==0.6.2
-
-# Development
-python-dotenv==1.0.1  # Load .env files
+python-dotenv==1.0.1
+python-slugify==8.0.4
+PyYAML==6.0.3
+requests==2.32.5
+sortedcontainers==2.4.0
+SQLAlchemy==2.0.36
+starlette==0.41.3
+text-unidecode==1.3
+typing_extensions==4.15.0
+urllib3==2.6.3
+uvicorn==0.32.1
+uvloop==0.22.1
+watchfiles==1.1.1
+websockets==16.0

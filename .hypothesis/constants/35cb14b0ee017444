@@ -1,0 +1,4 @@
+# file: /Users/marino/Coding/expense-reimbursement-system/app/models/database_models.py
+# hypothesis_version: 6.151.4
+
+['Submitted', 'approvals', 'expenses', 'expenses.id', 'notifications', 'users', 'users.email']

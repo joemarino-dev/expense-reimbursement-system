@@ -26,7 +26,7 @@ def test_submit_expense_success(page, test_server):
     - Success message appears
     """
     # Navigate to the form (test_server provides the URL)
-    page.goto(f"{test_server}/static/submit_expense.html")
+    page.goto(f"{test_server}/")
     
     # Fill in the form
     page.fill('input[name="submitter_email"]', 'john.doe@company.com')

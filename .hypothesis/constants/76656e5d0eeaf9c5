@@ -1,0 +1,4 @@
+# file: /Users/marino/Coding/expense-reimbursement-system/app/repositories/__init__.py
+# hypothesis_version: 6.151.4
+
+['ExpenseRepository', 'UserRepository']
