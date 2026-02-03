@@ -38,6 +38,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         playwright install chromium
+
+    - name: Run database migrations
+      env:
+        DATABASE_URL: postgresql://expense_user:expense_pass@localhost:5432/postgres
+      run: |
+        alembic upgrade head
     
     - name: Run tests with coverage
       env:
