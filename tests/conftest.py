@@ -282,21 +282,14 @@ def sample_expense_data():
 def test_server():
     """
     Starts FastAPI server with PostgreSQL test database for E2E tests.
-    Uses .env.test configuration file.
-    
-    Used by: E2E/UI tests (Playwright)
-    Why PostgreSQL: Full production-like environment for browser testing
     """
     import time
+    import os
     from multiprocessing import Process
-    from dotenv import load_dotenv
     from sqlalchemy import create_engine, text
     from sqlalchemy.orm import sessionmaker
     from app.database import Base
     from app.models.database_models import User
-    
-    # Load test environment variables
-    load_dotenv('.env.test', override=True)
     
     # Create and connect to test database and populate with users
     test_engine = _create_postgres_test_database()
@@ -311,26 +304,15 @@ def test_server():
     db.add(approver)
     db.commit()
     db.close()
+    test_engine.dispose()  # CLOSE the engine so database isn't "in use"
     
-    # Start server with correct database URL
-    import uvicorn
-    import os
-
-    # Set environment variable for the server process
-    os.environ['DATABASE_URL'] = "postgresql://expense_user:expense_pass@localhost:5432/test_expense_db"
-
-    config = uvicorn.Config(
-        "app.main:app",
-        host="127.0.0.1",
-        port=8000,
-        log_level="error"
-    )
-    server = uvicorn.Server(config)
-    process = Process(target=server.run, daemon=False)
+    # Start server using wrapper
+    from tests.test_server_wrapper import run_test_server
+    process = Process(target=run_test_server, daemon=False)
     process.start()
     
     # Wait for server to start
-    time.sleep(2)
+    time.sleep(3)
     
     yield "http://localhost:8000"
     
@@ -339,9 +321,4 @@ def test_server():
     process.join()
     
     # Drop test database
-    test_engine.dispose()
-    admin_engine = create_engine("postgresql://expense_user:expense_pass@localhost:5432/postgres")
-    with admin_engine.connect() as conn:
-        conn.execution_options(isolation_level="AUTOCOMMIT")
-        conn.execute(text("DROP DATABASE IF EXISTS test_expense_db"))
-    admin_engine.dispose()
+    _drop_postgres_test_database()
