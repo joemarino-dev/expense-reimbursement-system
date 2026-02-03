@@ -312,8 +312,13 @@ def test_server():
     db.commit()
     db.close()
     
-    # Start server
+    # Start server with correct database URL
     import uvicorn
+    import os
+
+    # Set environment variable for the server process
+    os.environ['DATABASE_URL'] = "postgresql://expense_user:expense_pass@localhost:5432/test_expense_db"
+
     config = uvicorn.Config(
         "app.main:app",
         host="127.0.0.1",
