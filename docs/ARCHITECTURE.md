@@ -101,7 +101,8 @@ This architecture separates concerns into distinct layers, making each layer ind
 
 **Development/Demo Approach:**
 - Frontend served as static files through FastAPI using `StaticFiles` mount
-- Accessible at: `http://127.0.0.1:8000/static/`
+- Main form accessible at: `http://127.0.0.1:8000/` (root)
+- Static assets (CSS/JS) accessible at: `http://127.0.0.1:8000/static/`
 - Single command to run entire application (`uvicorn app.main:app --reload`)
 
 **Why this approach for the portfolio project:**
@@ -191,9 +192,9 @@ expense-reimbursement-system/
 │   └── env.py
 │
 ├── frontend/                    # Simple HTML/JS frontend
-│   ├── index.html
-│   ├── styles.css
-│   └── app.js
+│   ├── submit_expense.html      # Expense submission form
+│   ├── static/                  # CSS, JS, images (future)
+│   └── templates/               # Additional HTML templates (future)
 │
 ├── docker-compose.yml           # Multi-container setup
 ├── Dockerfile                   # Application container
@@ -373,6 +374,8 @@ This architecture enables **5 distinct test levels**:
 - **Coverage:** Complete user journeys
 
 **Plus:** BDD layer (`tests/bdd/`) with Gherkin scenarios can span multiple levels
+
+**Implementation Status:** All five test levels have been implemented for Story #1 (Submit Expense), and additional coverage will be added as more stories are tackled.
 
 ## Configuration Management
 
