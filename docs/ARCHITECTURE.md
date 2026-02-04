@@ -151,59 +151,81 @@ Backend (FastAPI API)
 
 ```
 expense-reimbursement-system/
+├── .github/
+│   └── workflows/
+│       └── tests.yml            # GitHub Actions CI/CD pipeline
+│
 ├── app/
-│   ├── __init__.py
 │   ├── main.py                  # FastAPI application entry point
 │   ├── config.py                # Environment-based configuration
 │   ├── database.py              # Database connection and session management
+│   ├── dependencies.py          # Dependency injection for FastAPI
+│   ├── schemas.py               # Pydantic request/response models
 │   │
 │   ├── api/                     # API Layer - HTTP request/response handling
-│   │   ├── __init__.py
-│   │   ├── dependencies.py      # Dependency injection
-│   │   ├── expenses.py          # Expense endpoints
-│   │   └── health.py            # Health check endpoints
+│   │   └── expenses.py          # Expense endpoints (health check in main.py)
 │   │
 │   ├── services/                # Service Layer - Business logic
-│   │   ├── __init__.py
-│   │   ├── expense_service.py   # Expense business rules
-│   │   └── notification_service.py  # Notification logic
+│   │   └── expense_service.py   # Expense business rules and orchestration
 │   │
 │   ├── repositories/            # Repository Layer - Data access
 │   │   ├── __init__.py
 │   │   ├── expense_repository.py
+│   │   ├── notification_repository.py
 │   │   └── user_repository.py
 │   │
 │   └── models/
-│       ├── __init__.py
-│       ├── database_models.py   # SQLAlchemy ORM models
-│       └── schemas.py           # Pydantic request/response models
+│       └── database_models.py   # SQLAlchemy ORM models
 │
 ├── tests/
 │   ├── conftest.py              # Shared pytest fixtures
+│   ├── test_server_wrapper.py   # E2E test server startup wrapper
+│   │
 │   ├── unit/                    # Service layer unit tests (mocked repos)
-│   ├── integration/             # Repository layer tests (real DB)
+│   │   └── test_expense_service.py
+│   │
+│   ├── repository/              # Repository layer tests (real test DB)
+│   │   └── test_expense_repository.py
+│   │
 │   ├── api/                     # API endpoint tests
-│   ├── database/                # Property-based database tests
-│   ├── e2e/                     # Playwright end-to-end tests
-│   └── bdd/                     # pytest-bdd feature files
+│   │   └── test_expense_api.py
+│   │
+│   ├── integration/             # Integration and property-based tests
+│   │   ├── test_expense_creation_flow.py
+│   │   └── test_expense_properties.py
+│   │
+│   └── e2e/                     # Playwright end-to-end tests
+│       └── test_expense_ui.py
 │
 ├── alembic/                     # Database migrations
 │   ├── versions/
-│   └── env.py
+│   │   └── eae2fe7de1a6_create_initial_tables.py
+│   ├── env.py
+│   └── script.py.mako
 │
 ├── frontend/                    # Simple HTML/JS frontend
 │   ├── submit_expense.html      # Expense submission form
-│   ├── static/                  # CSS, JS, images (future)
+│   ├── static/                  # CSS, JS, images (prepared for future assets)
 │   └── templates/               # Additional HTML templates (future)
 │
-├── docker-compose.yml           # Multi-container setup
-├── Dockerfile                   # Application container
+├── .hypothesis/                 # Hypothesis test artifacts (property-based testing)
+│
+├── docs/
+│   └── ARCHITECTURE.md          # This file
+│
+├── create_test_users.py         # Helper script to populate test users
+├── clear_test_data.py           # Helper script to reset test database
+├── test_connection.py           # Database connection verification
+├── verify_tables.py             # Database schema verification
+│
+├── docker-compose.yml           # Multi-container setup (PostgreSQL)
+├── alembic.ini                  # Alembic migration configuration
+├── pytest.ini                   # Pytest configuration
 ├── requirements.txt             # Python dependencies
 ├── .env.example                 # Environment variable template
-└── docs/
-    ├── ARCHITECTURE.md          # This file
-    ├── API.md                   # API documentation
-    └── TESTING_STRATEGY.md      # Test approach and coverage
+├── .env                         # Environment variables (not committed)
+├── LICENSE                      # MIT License
+└── README.md                    # Project overview and setup
 ```
 
 ### Layer Responsibilities
